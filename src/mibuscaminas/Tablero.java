@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -16,6 +17,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 /**
@@ -26,6 +28,7 @@ public class Tablero extends JPanel{
     
     private ZRectangle zrect;
     private ZEllipse zell;
+    private Image mshi;
 
     public Tablero() {
 
@@ -42,18 +45,21 @@ public class Tablero extends JPanel{
 
         zrect = new ZRectangle(50, 260, 25, 25);
         zell = new ZEllipse(150, 260, 25, 25);
+        mshi = new ImageIcon("src/imagenes/10.png").getImage();
+        
     }
     
     private void doDrawing(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
-        
+        int width=mshi.getWidth(null);
         //Dibuixo un taulell d'ajedrez
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
-                if((i+j)%2==0)
-                    g2d.setPaint(new Color(0,0,0));
-                else g2d.setPaint(new Color(255,255,255));
-                g2d.fillRect(i*25, j*25, 25, 25);
+                //if((i+j)%2==0)
+                //    g2d.setPaint(new Color(0,0,0));
+                //else g2d.setPaint(new Color(255,255,255));
+                //g2d.fillRect(i*25, j*25, 25, 25);
+                g2d.drawImage(mshi, i*width, j*width, null);
             }
         }
 
