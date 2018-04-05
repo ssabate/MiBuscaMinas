@@ -24,146 +24,177 @@ import javax.swing.JPanel;
  *
  * @author profe
  */
-public class Tablero extends JPanel{
-    
+public class Tablero extends JPanel {
+
+    private final static int DIM=16;
     private ZRectangle zrect;
     private ZEllipse zell;
     private Image mshi;
+    private ZRectangle[][] tablero=new ZRectangle[DIM][DIM];
 
     public Tablero() {
 
         initUI();
     }
-    
+
     private void initUI() {
-        
+
         MovingAdapter ma = new MovingAdapter();
 
         addMouseMotionListener(ma);
         addMouseListener(ma);
         addMouseWheelListener(new ScaleHandler());
 
-        zrect = new ZRectangle(50, 260, 25, 25);
+        //zrect = new ZRectangle(50, 260, 25, 25);
         zell = new ZEllipse(150, 260, 25, 25);
-        mshi = new ImageIcon("src/imagenes/10.png").getImage();
-        
+        mshi = new ImageIcon("src/imagenes/1.png").getImage();
+        zrect = new ZRectangle(50, 260, mshi);
+
     }
-    
+
     private void doDrawing(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
-        int width=mshi.getWidth(null);
+        int width = mshi.getWidth(null);
         //Dibuixo un taulell d'ajedrez
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
+        for (int i = 0; i < DIM; i++) {
+            for (int j = 0; j < DIM; j++) {
                 //if((i+j)%2==0)
                 //    g2d.setPaint(new Color(0,0,0));
                 //else g2d.setPaint(new Color(255,255,255));
                 //g2d.fillRect(i*25, j*25, 25, 25);
-                g2d.drawImage(mshi, i*width, j*width, null);
+                //g2d.drawImage(mshi, i * width, j * width, null);
+                tablero[i][j]=new ZRectangle(i * width, j * width, mshi);
+                tablero[i][j].dibuja(g2d);
             }
         }
 
         //---------------
-        
+        //Prova p = new Prova(g2d, new ImageIcon("src/imagenes/1.png").getImage(), 10, 250);
+        //p.dibuixa();
         Font font = new Font("Serif", Font.BOLD, 40);
         g2d.setFont(font);
-        
+
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                        RenderingHints.VALUE_ANTIALIAS_ON);
+                RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                        RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
         g2d.setPaint(new Color(0, 0, 200));
-        g2d.fill(zrect);
+        //g2d.fill(zrect);
+        zrect.dibuja(g2d);
         g2d.setPaint(new Color(0, 200, 0));
-        g2d.fill(zell);        
+        g2d.fill(zell);
     }
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        
-        doDrawing(g);        
+
+        doDrawing(g);
     }
 
     class ZEllipse extends Ellipse2D.Float {
-        
+
         public ZEllipse(float x, float y, float width, float height) {
-            
+
             this.setFrame(x, y, width, height);
         }
 
         public boolean isHit(float x, float y) {
-            
+
             return getBounds2D().contains(x, y);
         }
 
         public void addX(float x) {
-            
+
             this.x += x;
         }
+
         public void setX(float x) {
-            
+
             this.x = x;
         }
 
         public void addY(float y) {
-            
+
             this.y += y;
         }
+
         public void setY(float y) {
-            
+
             this.y = y;
         }
 
         public void addWidth(float w) {
-            
+
             this.width += w;
         }
 
         public void addHeight(float h) {
-            
+
             this.height += h;
         }
     }
 
     class ZRectangle extends Rectangle2D.Float {
 
-        public ZRectangle(float x, float y, float width, float height) {
-            
+        private Graphics2D g2d;
+        private Image img;
+        private float x;
+        private float y;
+
+        public ZRectangle(float xpos, float ypos, float width, float height) {
+            x = xpos;
+            y = ypos;
             setRect(x, y, width, height);
         }
 
+        public ZRectangle(float x, float y, Image imagen) {
+
+            this(x, y, imagen.getWidth(null), imagen.getHeight(null));
+            img = imagen;
+
+        }
+
+        public void dibuja(Graphics2D g) {
+
+            g.fill(this);
+            g.drawImage(img, (int)x, (int)y, null);
+
+        }
+
         public boolean isHit(float x, float y) {
-            
+
             return getBounds2D().contains(x, y);
         }
 
         public void addX(float x) {
-            
+
             this.x += x;
         }
+
         public void setX(float x) {
-            
+
             this.x = x;
         }
 
         public void addY(float y) {
-            
+
             this.y += y;
         }
+
         public void setY(float y) {
-            
+
             this.y = y;
         }
 
         public void addWidth(float w) {
-            
+
             this.width += w;
         }
 
         public void addHeight(float h) {
-            
+
             this.height += h;
         }
     }
@@ -175,40 +206,43 @@ public class Tablero extends JPanel{
 
         @Override
         public void mousePressed(MouseEvent e) {
-            
+
             x = e.getX();
             y = e.getY();
         }
 
         @Override
         public void mouseDragged(MouseEvent e) {
-            System.out.println(zell.getX()+"-"+zell.getY());
-            System.out.println(zrect.getX()+"-"+zrect.getY());
+            System.out.println(zell.getX() + "-" + zell.getY());
+            System.out.println(zrect.getX() + "-" + zrect.getY());
             System.out.println();
             doMove(e);
-        }   
+        }
 
         @Override
         public void mouseReleased(MouseEvent e) {
-            if(Math.floor(zell.getX())%25f!=0) 
-                zell.setX(25.0f*(float)(Math.floor(zell.getX()/25f)));
-            if(Math.floor(zell.getY())%25f!=0) 
-                zell.setY(25.0f*(float)(Math.floor(zell.getY()/25f)));
-            if(Math.floor(zrect.getX())%25f!=0) 
-                zrect.setX(25.0f*(float)(Math.floor(zrect.getX()/25f)));
-            if(Math.floor(zrect.getY())%25f!=0) 
-                zrect.setY(25.0f*(float)(Math.floor(zrect.getY()/25f)));
+            if (Math.floor(zell.getX()) % 25f != 0) {
+                zell.setX(25.0f * (float) (Math.floor(zell.getX() / 25f)));
+            }
+            if (Math.floor(zell.getY()) % 25f != 0) {
+                zell.setY(25.0f * (float) (Math.floor(zell.getY() / 25f)));
+            }
+            if (Math.floor(zrect.getX()) % 25f != 0) {
+                zrect.setX(25.0f * (float) (Math.floor(zrect.getX() / 25f)));
+            }
+            if (Math.floor(zrect.getY()) % 25f != 0) {
+                zrect.setY(25.0f * (float) (Math.floor(zrect.getY() / 25f)));
+            }
             repaint(); //To change body of generated methods, choose Tools | Templates.
         }
-        
+
         private void doMove(MouseEvent e) {
-            
+
             int dx = e.getX() - x;
             int dy = e.getY() - y;
 
             if (zrect.isHit(x, y)) {
-               if(!zell.intersects(zrect.x+dx,zrect.y+dy,zrect.getHeight(),zrect.getWidth()))
-                {
+                if (!zell.intersects(zrect.x + dx, zrect.y + dy, zrect.getHeight(), zrect.getWidth())) {
                     zrect.addX(dx);
                     zrect.addY(dy);
                 }
@@ -216,8 +250,7 @@ public class Tablero extends JPanel{
             }
 
             if (zell.isHit(x, y)) {
-               if(!zrect.intersects(zell.x+dx,zell.y+dy,zell.getHeight(),zell.getWidth()))
-                {
+                if (!zrect.intersects(zell.x + dx, zell.y + dy, zell.getHeight(), zell.getWidth())) {
                     zell.addX(dx);
                     zell.addY(dy);
                 }
@@ -225,42 +258,66 @@ public class Tablero extends JPanel{
             }
 
             x += dx;
-            y += dy;            
+            y += dy;
         }
     }
 
     class ScaleHandler implements MouseWheelListener {
-        
+
         @Override
         public void mouseWheelMoved(MouseWheelEvent e) {
 
             doScale(e);
         }
-        
+
         private void doScale(MouseWheelEvent e) {
-            
+
             int x = e.getX();
             int y = e.getY();
 
             if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
 
                 if (zrect.isHit(x, y)) {
-                    
-                    float amount =  e.getWheelRotation() * 5f;
+
+                    float amount = e.getWheelRotation() * 5f;
                     zrect.addWidth(amount);
                     zrect.addHeight(amount);
                     repaint();
                 }
 
                 if (zell.isHit(x, y)) {
-                    
-                    float amount =  e.getWheelRotation() * 5f;
+
+                    float amount = e.getWheelRotation() * 5f;
                     zell.addWidth(amount);
                     zell.addHeight(amount);
                     repaint();
                 }
-            }            
+            }
         }
     }
 
+}
+
+class Prova {
+
+    private Graphics2D g2d;
+    private Image img;
+    private int x;
+    private int y;
+
+    public Prova(Graphics2D g, Image mshi, int xpos, int ypos) {
+        g2d = g;
+        img = mshi;
+        x = xpos;
+        y = ypos;
+    }
+
+    public void dibuixa() {
+
+        Graphics2D g = g2d;
+        //(Graphics2D) g2d.create();
+        //g.drawRect(x, y, img.getWidth(null), img.getHeight(null));
+        g.drawImage(img, x, y, null);
+        //g.dispose();
+    }
 }
