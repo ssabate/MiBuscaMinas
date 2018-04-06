@@ -85,7 +85,7 @@ public class Tablero extends JPanel {
     private ZRectangle zrect;
     private ZEllipse zell;
     private Image mshi;
-    private ZRectangle[][] tablero = new ZRectangle[DIM][DIM];
+    private static ZRectangle[][] tablero = new ZRectangle[DIM][DIM];
 
     public Tablero() {
         initUI();
@@ -128,10 +128,50 @@ public class Tablero extends JPanel {
 
     }
 
-    private void actualizarCasillas(int i, int j) {
+    private static void actualizarVecinos(int i, int j) {
+        boolean trobat=false;
+        for(int k=dec(i);k>=0 && !trobat;k--){
+            tablero[k][j].clicada = true;
+            tablero[k][j].setImg(tablero[k][j].buscaImagen());
+            trobat=(tablero[k][j].estat != Estat.CERO && tablero[k][j].estat != Estat.BOMBA);
+        }
+        trobat=false;
+        for(int k=inc(i);k<DIM && !trobat;k++){
+            tablero[k][j].clicada = true;
+            tablero[k][j].setImg(tablero[k][j].buscaImagen());
+            trobat=(tablero[k][j].estat != Estat.CERO && tablero[k][j].estat != Estat.BOMBA);
+        }
+        trobat=false;
+        for(int k=dec(j);k>=0 && !trobat;k--){
+            tablero[i][k].clicada = true;
+            tablero[i][k].setImg(tablero[i][k].buscaImagen());
+            trobat=(tablero[i][k].estat != Estat.CERO && tablero[i][k].estat != Estat.BOMBA);
+        }
+        trobat=false;
+        for(int k=inc(j);k<DIM && !trobat;k++){
+            tablero[i][k].clicada = true;
+            tablero[i][k].setImg(tablero[i][k].buscaImagen());
+            trobat=(tablero[i][k].estat != Estat.CERO && tablero[i][k].estat != Estat.BOMBA);
+        }
+//        for (int k = dec(i); k <= inc(i); k++) {
+//            for (int l = dec(j); l <= inc(j); l++) {
+//                if (k != i || l != j) {
+//                    tablero[k][l].clicada = true;
+//                    tablero[k][l].setImg(tablero[k][l].buscaImagen());
+//                    if (tablero[k][l].estat == Estat.CERO) {
+//                        Tablero.actualizarVecinos(k, l);
+//                    }
+//                }
+//
+//            }
+//        }
+
+    }
+
+    public static void actualizarCasillas(int i, int j) {
         for (int k = dec(i); k <= inc(i); k++) {
             for (int l = dec(j); l <= inc(j); l++) {
-                tablero[k][l].estat = tablero[k][l].estat.sumar();
+                if (k != i || l != j) tablero[k][l].estat = tablero[k][l].estat.sumar();
             }
 //                switch(tablero[k][l].estat){
 //                    case CERO:
@@ -149,10 +189,9 @@ public class Tablero extends JPanel {
 //                }
 
         }
-
     }
 
-    private int dec(int valor) {
+    private static int dec(int valor) {
 
         if (valor > 0) {
             valor--;
@@ -161,7 +200,7 @@ public class Tablero extends JPanel {
 
     }
 
-    private int inc(int valor) {
+    private static int inc(int valor) {
 
         if (valor < DIM - 1) {
             valor++;
@@ -385,9 +424,10 @@ public class Tablero extends JPanel {
             x = e.getX();
             y = e.getY();
             //Buscamos la casilla seleccionada
+            int i = 0, j = 0;
             fuera:
-            for (int i = 0; i < tablero.length; i++) {
-                for (int j = 0; j < tablero[i].length; j++) {
+            for (i = 0; i < tablero.length; i++) {
+                for (j = 0; j < tablero[i].length; j++) {
                     if (tablero[i][j].isHit(x, y)) {
                         seleccionat = tablero[i][j];
                         break fuera;
@@ -398,7 +438,7 @@ public class Tablero extends JPanel {
             //Si han apretado el botón izquierdo
             if (e.getButton() == MouseEvent.BUTTON1) {
                 //Si no está marcada actuamos con el clic
-                if (seleccionat != null && !seleccionat.marcada) {
+                if (seleccionat != null && !seleccionat.marcada && !seleccionat.clicada) {
                     switch (seleccionat.estat) {
                         case BOMBA:
                             JOptionPane.showMessageDialog(null, "Game over");
@@ -406,9 +446,9 @@ public class Tablero extends JPanel {
                         default:
                             seleccionat.clicada = true;
                             seleccionat.setImg(seleccionat.buscaImagen());
+                            Tablero.actualizarVecinos(i, j);
                             repaint();
                     }
-
                 }
             } else //Si han apretado el botón derecho
             if (e.getButton() == MouseEvent.BUTTON3) {
