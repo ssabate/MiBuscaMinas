@@ -14,8 +14,8 @@ import javax.swing.JFrame;
  */
 public class MiBuscaMinas extends JFrame{
 
-    private final int FRAME_WIDTH = 250;
-    private final int FRAME_HEIGHT = 350;
+    private final int FRAME_WIDTH = 241;
+    private final int FRAME_HEIGHT = 300;
 
     public MiBuscaMinas(){
         initUI();

@@ -17,9 +17,12 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Random;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
+
+enum Estat {BOMBA, CERO, UNO, DOS, TRES, CUATRO };
 /**
  *
  * @author profe
@@ -27,6 +30,7 @@ import javax.swing.JPanel;
 public class Tablero extends JPanel {
 
     private final static int DIM=16;
+    private final static int NUM_BOMBAS=16;
     private ZRectangle zrect;
     private ZEllipse zell;
     private Image mshi;
@@ -38,7 +42,7 @@ public class Tablero extends JPanel {
     }
 
     private void initUI() {
-
+        Random r=new Random();
         MovingAdapter ma = new MovingAdapter();
 
         addMouseMotionListener(ma);
@@ -47,15 +51,77 @@ public class Tablero extends JPanel {
 
         //zrect = new ZRectangle(50, 260, 25, 25);
         zell = new ZEllipse(150, 260, 25, 25);
-        mshi = new ImageIcon("src/imagenes/1.png").getImage();
+        mshi = new ImageIcon("src/imagenes/10.png").getImage();
         zrect = new ZRectangle(50, 260, mshi);
+        
+        //Omplo el taulell
+        mshi = new ImageIcon("src/imagenes/10.png").getImage();
+        int width = mshi.getWidth(null);
+        //Omplo el taulell
+        for (int i = 0; i < DIM; i++) {
+            for (int j = 0; j < DIM; j++) {
+                tablero[i][j]=new ZRectangle(i * width, j * width, mshi);
+            }
+        }
+        
+        //Col·loco les bombes aleatòriament
+        for (int k = 0; k < NUM_BOMBAS; ) {
+            int i=r.nextInt(DIM);
+            int j=r.nextInt(DIM);
+            if(tablero[i][j].estat!=Estat.BOMBA){
+                tablero[i][j].estat=Estat.BOMBA;
+                actualizarCasillas(i, j);
+                k++;
+            }
+            
+        }
 
+    }
+    
+    private void actualizarCasillas(int i, int j){
+        for (int k = dec(i); k <= inc(i); k++) {
+            for (int l = dec(j); l <= inc(j); l++)
+            
+                switch(tablero[k][l].estat){
+                    case CERO:
+                        tablero[k][l].estat=Estat.UNO;
+                        break;
+                    case UNO:
+                        tablero[k][l].estat=Estat.DOS;
+                        break;
+                    case DOS:
+                        tablero[k][l].estat=Estat.TRES;
+                        break;
+                    case TRES:
+                        tablero[k][l].estat=Estat.CUATRO;
+                        break;
+                }
+            
+        }
+    
+    
+    }
+    
+    private int dec(int valor){
+    
+        if(valor>0) valor--;
+        return valor;
+    
+    }
+
+    private int inc(int valor){
+    
+        if(valor<DIM-1) valor++;
+        return valor;
+    
     }
 
     private void doDrawing(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
+        //Imatge de casella verge
+        mshi = new ImageIcon("src/imagenes/10.png").getImage();
         int width = mshi.getWidth(null);
-        //Dibuixo un taulell d'ajedrez
+        //Dibuixo un taulell
         for (int i = 0; i < DIM; i++) {
             for (int j = 0; j < DIM; j++) {
                 //if((i+j)%2==0)
@@ -63,7 +129,28 @@ public class Tablero extends JPanel {
                 //else g2d.setPaint(new Color(255,255,255));
                 //g2d.fillRect(i*25, j*25, 25, 25);
                 //g2d.drawImage(mshi, i * width, j * width, null);
-                tablero[i][j]=new ZRectangle(i * width, j * width, mshi);
+                //tablero[i][j]=new ZRectangle(i * width, j * width, mshi);
+                switch(tablero[i][j].estat){
+                    case CERO:
+                        mshi = new ImageIcon("src/imagenes/10.png").getImage();
+                        break;
+                    case UNO:
+                        mshi = new ImageIcon("src/imagenes/1.png").getImage();
+                        break;
+                    case DOS:
+                        mshi = new ImageIcon("src/imagenes/2.png").getImage();
+                        break;
+                    case TRES:
+                        mshi = new ImageIcon("src/imagenes/3.png").getImage();
+                        break;
+                    case CUATRO:
+                        mshi = new ImageIcon("src/imagenes/4.png").getImage();
+                        break;
+                    case BOMBA:
+                        mshi = new ImageIcon("src/imagenes/9.png").getImage();
+                        break;
+}
+    tablero[i][j].img=mshi;
                 tablero[i][j].dibuja(g2d);
             }
         }
@@ -81,9 +168,9 @@ public class Tablero extends JPanel {
 
         g2d.setPaint(new Color(0, 0, 200));
         //g2d.fill(zrect);
-        zrect.dibuja(g2d);
+        //zrect.dibuja(g2d);
         g2d.setPaint(new Color(0, 200, 0));
-        g2d.fill(zell);
+        //g2d.fill(zell);
     }
 
     @Override
@@ -142,11 +229,14 @@ public class Tablero extends JPanel {
         private Image img;
         private float x;
         private float y;
+        private Estat estat; 
+        
 
         public ZRectangle(float xpos, float ypos, float width, float height) {
             x = xpos;
             y = ypos;
             setRect(x, y, width, height);
+            estat=Estat.CERO;
         }
 
         public ZRectangle(float x, float y, Image imagen) {
@@ -321,3 +411,5 @@ class Prova {
         //g.dispose();
     }
 }
+
+
