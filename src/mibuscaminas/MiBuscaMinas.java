@@ -15,7 +15,7 @@ import javax.swing.JFrame;
 public class MiBuscaMinas extends JFrame{
 
     private final int FRAME_WIDTH = 241;
-    private final int FRAME_HEIGHT = 300;
+    private final int FRAME_HEIGHT = 600;
 
     public MiBuscaMinas(){
         initUI();
@@ -28,7 +28,7 @@ public class MiBuscaMinas extends JFrame{
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setResizable(false);
+        //setResizable(false);
 
     
     }
