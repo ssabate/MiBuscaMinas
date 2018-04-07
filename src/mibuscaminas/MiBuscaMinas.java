@@ -15,7 +15,6 @@ import javax.swing.JOptionPane;
  */
 public class MiBuscaMinas extends JFrame {
 
-    private final int FRAME_HEIGHT = 600;
 
     public MiBuscaMinas() {
         initUI();
@@ -26,10 +25,11 @@ public class MiBuscaMinas extends JFrame {
         Tablero t = new Tablero();
         add(t);
         setTitle("Buscaminas");
-        setSize(t.DIM * t.mshi.getWidth(null) + 1, FRAME_HEIGHT);
+        if(t.test) setSize(t.DIM * t.mshi.getWidth(null) + 1, ((t.DIM * 2)+6) * t.mshi.getHeight(null));
+        else  setSize(t.DIM * t.mshi.getWidth(null) + 1, (t.DIM+6) * t.mshi.getHeight(null));
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //setResizable(false);
+        setResizable(false);
     }
 
     public static void main(String[] args) {

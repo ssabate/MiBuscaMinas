@@ -80,14 +80,18 @@ public class Tablero extends JPanel {
 
     private final static int NUM_BOTONS = 4;
 
-    final static int DIM = 15;
-    final static int NUM_BOMBAS = 224;
+    final static int DIM = 16;
+    final static int NUM_BOMBAS = 40;
     private ZRectangle zrect;
     private ZEllipse zell;
     Image mshi = new ImageIcon("src/imagenes/10.png").getImage();
     private static ZRectangle[][] tablero = new ZRectangle[DIM][DIM];
     private boolean gameOver = false;
+    private boolean ganador = false;
+    boolean test = false;
     private int contMarcadas = 0;
+    private int contMarcadasCorrectas = 0;
+    private static int contClicadas = 0;
 
     public Tablero() {
         initUI();
@@ -106,9 +110,8 @@ public class Tablero extends JPanel {
 //        mshi = new ImageIcon("src/imagenes/10.png").getImage();
 //        zrect = new ZRectangle(50, 260, mshi);
 //        
-        
         if (NUM_BOMBAS >= DIM * DIM) {
-            JOptionPane.showMessageDialog(null, "Tablero de "+DIM+"x"+DIM+"="+(DIM*DIM)+" casillas con "+NUM_BOMBAS+" bombas,\n reduce el número de bombas o aumenta\n el tamaño del tablero!!");
+            JOptionPane.showMessageDialog(null, "Tablero de " + DIM + "x" + DIM + "=" + (DIM * DIM) + " casillas con " + NUM_BOMBAS + " bombas,\n reduce el número de bombas o aumenta\n el tamaño del tablero!!");
             System.exit(0);
         }
         //Omplo el taulell
@@ -136,14 +139,15 @@ public class Tablero extends JPanel {
     }
 
     private static void tratarCelda(int i, int j) {
-        if (tablero[i][j].clicada || tablero[i][j].estat == Estat.BOMBA) {
+        if (tablero[i][j].clicada || tablero[i][j].marcada || tablero[i][j].estat == Estat.BOMBA) {
             return;
         }
-        System.out.println("Trato: "+i+"-"+j);
+        System.out.println("Trato: " + i + "-" + j);
         tablero[i][j].clicada = true;
+        contClicadas++;
         tablero[i][j].setImg(tablero[i][j].buscaImagen());
         //if (tablero[i][j].estat == Estat.CERO) {
-            actualizarVecinos(i, j);
+        actualizarVecinos(i, j);
         //}
 
     }
@@ -261,14 +265,15 @@ public class Tablero extends JPanel {
                 }
             }
         }
-        for (int i = 0; i < DIM; i++) {
-            for (int j = 0; j < DIM; j++) {
-                //if((i+j)%2==0)
-                //    g2d.setPaint(new Color(0,0,0));
-                //else g2d.setPaint(new Color(255,255,255));
-                //g2d.fillRect(i*25, j*25, 25, 25);
-                //g2d.drawImage(mshi, i * width, j * width, null);
-                //tablero[i][j]=new ZRectangle(i * width, j * width, mshi);
+        if (test) {
+            for (int i = 0; i < DIM; i++) {
+                for (int j = 0; j < DIM; j++) {
+                    //if((i+j)%2==0)
+                    //    g2d.setPaint(new Color(0,0,0));
+                    //else g2d.setPaint(new Color(255,255,255));
+                    //g2d.fillRect(i*25, j*25, 25, 25);
+                    //g2d.drawImage(mshi, i * width, j * width, null);
+                    //tablero[i][j]=new ZRectangle(i * width, j * width, mshi);
 //                switch (tablero[i][j].estat) {
 //                    case CERO:
 //                        mshi = new ImageIcon("src/imagenes/0.png").getImage();
@@ -301,9 +306,11 @@ public class Tablero extends JPanel {
 //                        mshi = new ImageIcon("src/imagenes/9.png").getImage();
 //                        break;
 //                }
-                //tablero[i][j].img = mshi;
-                tablero[i][j].dibuja(g2d, DIM + 1, tablero[i][j].buscaImagen());
+                    //tablero[i][j].img = mshi;
+                    tablero[i][j].dibuja(g2d, DIM + 1, tablero[i][j].buscaImagen());
+                }
             }
+
         }
         //---------------
         //Prova p = new Prova(g2d, new ImageIcon("src/imagenes/1.png").getImage(), 10, 250);
@@ -320,9 +327,14 @@ public class Tablero extends JPanel {
         if (!gameOver) {
             mensaje = "Bombas marcadas: " + contMarcadas + "/" + NUM_BOMBAS;
         } else {
-            mensaje = "Has perdido...";
+            if (!ganador) {
+                mensaje = "Has perdido...";
+            } else {
+                mensaje = "Has ganado!!";
+            }
         }
-        g2d.drawString(mensaje, 0, (DIM * 2 + 3) * mshi.getHeight(null));
+        if(test) g2d.drawString(mensaje, 0, (DIM * 2 + 3) * mshi.getHeight(null));
+        else g2d.drawString(mensaje, 0, (DIM + 2) * mshi.getHeight(null));
     }
 
     @Override
@@ -340,6 +352,9 @@ public class Tablero extends JPanel {
 
         @Override
         public void mousePressed(MouseEvent e) {
+            if (gameOver) {
+                return;
+            }
             ZRectangle seleccionat = null;
             Image img = null;
             x = e.getX();
@@ -359,11 +374,12 @@ public class Tablero extends JPanel {
 //            int temp=i;
 //            i=j;
 //            j=temp;
-            System.out.println("Seleccion: "+i+"-"+j);
+            System.out.println("Seleccion: " + i + "-" + j);
             //Si han apretado el botón izquierdo
             if (e.getButton() == MouseEvent.BUTTON1) {
                 //Si no está marcada actuamos con el clic
                 if (seleccionat != null && !seleccionat.marcada && !seleccionat.clicada) {
+                    contClicadas++;
                     switch (seleccionat.estat) {
                         case BOMBA:
                             gameOver = true;//JOptionPane.showMessageDialog(null, "Game over");
@@ -373,8 +389,11 @@ public class Tablero extends JPanel {
                             seleccionat.setImg(seleccionat.buscaImagen());
                             //Inexplicablemente me cambia la i y la j cuando DIM es par
                             //if(DIM%2!=0) 
-                                Tablero.actualizarVecinos(i, j);
+                            Tablero.actualizarVecinos(i, j);
                             //else Tablero.actualizarVecinos(j, i);
+                            if (contClicadas == DIM * DIM - NUM_BOMBAS && contMarcadasCorrectas == NUM_BOMBAS) {
+                                ganador = gameOver = true;
+                            }
                     }
                     repaint();
                 }
@@ -388,6 +407,12 @@ public class Tablero extends JPanel {
                     img = (seleccionat.marcada ? new ImageIcon("src/imagenes/11.png").getImage() : new ImageIcon("src/imagenes/10.png").getImage());
                     seleccionat.setImg(img);
                     contMarcadas += (seleccionat.marcada ? 1 : -1);
+                    if (seleccionat.estat == Estat.BOMBA) {
+                        contMarcadasCorrectas += (seleccionat.marcada ? 1 : -1);
+                    }
+                    if (contClicadas == DIM * DIM - NUM_BOMBAS && contMarcadasCorrectas == NUM_BOMBAS) {
+                        ganador = gameOver = true;
+                    }
                     repaint();
                 }
             }
