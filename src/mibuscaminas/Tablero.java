@@ -146,9 +146,9 @@ public class Tablero extends JPanel {
         tablero[i][j].clicada = true;
         contClicadas++;
         tablero[i][j].setImg(tablero[i][j].buscaImagen());
-        //if (tablero[i][j].estat == Estat.CERO) {
-        actualizarVecinos(i, j);
-        //}
+        if (tablero[i][j].estat == Estat.CERO) {
+            actualizarVecinos(i, j);
+        }
 
     }
 
