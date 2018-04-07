@@ -80,12 +80,14 @@ public class Tablero extends JPanel {
 
     private final static int NUM_BOTONS = 4;
 
-    private final static int DIM = 16;
-    private final static int NUM_BOMBAS = 15;
+    final static int DIM = 15;
+    final static int NUM_BOMBAS = 224;
     private ZRectangle zrect;
     private ZEllipse zell;
-    private Image mshi;
+    Image mshi = new ImageIcon("src/imagenes/10.png").getImage();
     private static ZRectangle[][] tablero = new ZRectangle[DIM][DIM];
+    private boolean gameOver = false;
+    private int contMarcadas = 0;
 
     public Tablero() {
         initUI();
@@ -104,6 +106,11 @@ public class Tablero extends JPanel {
 //        mshi = new ImageIcon("src/imagenes/10.png").getImage();
 //        zrect = new ZRectangle(50, 260, mshi);
 //        
+        
+        if (NUM_BOMBAS >= DIM * DIM) {
+            JOptionPane.showMessageDialog(null, "Tablero de "+DIM+"x"+DIM+"="+(DIM*DIM)+" casillas con "+NUM_BOMBAS+" bombas,\n reduce el número de bombas o aumenta\n el tamaño del tablero!!");
+            System.exit(0);
+        }
         //Omplo el taulell
         mshi = new ImageIcon("src/imagenes/10.png").getImage();
         int width = mshi.getWidth(null);
@@ -128,50 +135,52 @@ public class Tablero extends JPanel {
 
     }
 
-    private static void actualizarVecinos(int i, int j) {
-        boolean trobat=false;
-        for(int k=dec(i);k>=0 && !trobat;k--){
-            tablero[k][j].clicada = true;
-            tablero[k][j].setImg(tablero[k][j].buscaImagen());
-            trobat=(tablero[k][j].estat != Estat.CERO && tablero[k][j].estat != Estat.BOMBA);
+    private static void tratarCelda(int i, int j) {
+        if (tablero[i][j].clicada || tablero[i][j].estat == Estat.BOMBA) {
+            return;
         }
-        trobat=false;
-        for(int k=inc(i);k<DIM && !trobat;k++){
-            tablero[k][j].clicada = true;
-            tablero[k][j].setImg(tablero[k][j].buscaImagen());
-            trobat=(tablero[k][j].estat != Estat.CERO && tablero[k][j].estat != Estat.BOMBA);
-        }
-        trobat=false;
-        for(int k=dec(j);k>=0 && !trobat;k--){
-            tablero[i][k].clicada = true;
-            tablero[i][k].setImg(tablero[i][k].buscaImagen());
-            trobat=(tablero[i][k].estat != Estat.CERO && tablero[i][k].estat != Estat.BOMBA);
-        }
-        trobat=false;
-        for(int k=inc(j);k<DIM && !trobat;k++){
-            tablero[i][k].clicada = true;
-            tablero[i][k].setImg(tablero[i][k].buscaImagen());
-            trobat=(tablero[i][k].estat != Estat.CERO && tablero[i][k].estat != Estat.BOMBA);
-        }
-//        for (int k = dec(i); k <= inc(i); k++) {
-//            for (int l = dec(j); l <= inc(j); l++) {
-//                if (k != i || l != j) {
-//                    tablero[k][l].clicada = true;
-//                    tablero[k][l].setImg(tablero[k][l].buscaImagen());
-//                    if (tablero[k][l].estat == Estat.CERO) {
-//                        Tablero.actualizarVecinos(k, l);
-//                    }
-//                }
-//
-//            }
-//        }
+        System.out.println("Trato: "+i+"-"+j);
+        tablero[i][j].clicada = true;
+        tablero[i][j].setImg(tablero[i][j].buscaImagen());
+        //if (tablero[i][j].estat == Estat.CERO) {
+            actualizarVecinos(i, j);
+        //}
 
+    }
+
+    private static void actualizarVecinos(int i, int j) {
+        tratarCelda(dec(i), dec(j));
+        if (j != 0) {
+            tratarCelda(dec(i), j);
+        }
+        if (j != DIM - 1) {
+            tratarCelda(dec(i), inc(j));
+        }
+        if (i != 0) {
+            if (j != 0) {
+                tratarCelda(i, dec(j));
+            }
+            if (j != DIM - 1) {
+                tratarCelda(i, inc(j));
+            }
+        }
+        if (i != DIM - 1) {
+            if (j != 0) {
+                tratarCelda(inc(i), dec(j));
+            }
+            tratarCelda(inc(i), j);
+            if (j != DIM - 1) {
+                tratarCelda(inc(i), inc(j));
+            }
+        }
     }
 
     public static void actualizarCasillas(int i, int j) {
         for (int k = dec(i); k <= inc(i); k++) {
             for (int l = dec(j); l <= inc(j); l++) {
-                if (k != i || l != j) tablero[k][l].estat = tablero[k][l].estat.sumar();
+                if (k != i || l != j) {
+                    tablero[k][l].estat = tablero[k][l].estat.sumar();
+                }
             }
 //                switch(tablero[k][l].estat){
 //                    case CERO:
@@ -220,11 +229,36 @@ public class Tablero extends JPanel {
         //Dibuixo un taulell en caselles amagades i un altre en descobertes
         for (int i = 0; i < DIM; i++) {
             for (int j = 0; j < DIM; j++) {
-                if (tablero[i][j].marcada) {
-                    tablero[i][j].setImg(new ImageIcon("src/imagenes/11.png").getImage());
-                }
+                if (!gameOver) {
+                    if (tablero[i][j].marcada) {
+                        tablero[i][j].setImg(new ImageIcon("src/imagenes/11.png").getImage());
+                    }
+                    tablero[i][j].dibuja(g2d);
+                } else {
+                    if (tablero[i][j].marcada) {
+                        if (tablero[i][j].estat == Estat.BOMBA) {
+                            tablero[i][j].setImg(new ImageIcon("src/imagenes/11.png").getImage());
+                        } else {
+                            tablero[i][j].setImg(new ImageIcon("src/imagenes/12.png").getImage());
+                        }
+                        tablero[i][j].dibuja(g2d);
+                    } else {
+                        if (tablero[i][j].estat == Estat.BOMBA) {
+                            tablero[i][j].setImg(new ImageIcon("src/imagenes/9.png").getImage());
+                            tablero[i][j].dibuja(g2d);
+                        } else {
+                            if (tablero[i][j].clicada) {
+                                tablero[i][j].dibuja(g2d);
+                                //tablero[i][j].dibuja(g2d, DIM + 1, tablero[i][j].buscaImagen());
+                            } else {
+                                tablero[i][j].setImg(new ImageIcon("src/imagenes/10.png").getImage());
+                                tablero[i][j].dibuja(g2d);
+                            }
+                        }
 
-                tablero[i][j].dibuja(g2d);
+                    }
+
+                }
             }
         }
         for (int i = 0; i < DIM; i++) {
@@ -274,14 +308,21 @@ public class Tablero extends JPanel {
         //---------------
         //Prova p = new Prova(g2d, new ImageIcon("src/imagenes/1.png").getImage(), 10, 250);
         //p.dibuixa();
-        Font font = new Font("Serif", Font.BOLD, 40);
+        Font font = new Font("Serif", Font.BOLD, 15);
         g2d.setFont(font);
 
         g2d.setPaint(new Color(0, 0, 200));
         //g2d.fill(zrect);
         //zrect.dibuja(g2d);
-        g2d.setPaint(new Color(0, 200, 0));
+        g2d.setPaint(new Color(0, 0, 0));
         //g2d.fill(zell);
+        String mensaje;
+        if (!gameOver) {
+            mensaje = "Bombas marcadas: " + contMarcadas + "/" + NUM_BOMBAS;
+        } else {
+            mensaje = "Has perdido...";
+        }
+        g2d.drawString(mensaje, 0, (DIM * 2 + 3) * mshi.getHeight(null));
     }
 
     @Override
@@ -289,6 +330,118 @@ public class Tablero extends JPanel {
         super.paintComponent(g);
 
         doDrawing(g);
+    }
+
+    class MovingAdapter extends MouseAdapter {
+
+        private int x;
+        private int y;
+        private final int NUM_BOTONS = MouseInfo.getNumberOfButtons();
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            ZRectangle seleccionat = null;
+            Image img = null;
+            x = e.getX();
+            y = e.getY();
+            //Buscamos la casilla seleccionada
+            int i = 0, j = 0;
+            fuera:
+            for (i = 0; i < tablero.length; i++) {
+                for (j = 0; j < tablero[i].length; j++) {
+                    if (tablero[i][j].isHit(x, y)) {
+                        seleccionat = tablero[i][j];
+                        break fuera;
+                    }
+
+                }
+            }
+//            int temp=i;
+//            i=j;
+//            j=temp;
+            System.out.println("Seleccion: "+i+"-"+j);
+            //Si han apretado el botón izquierdo
+            if (e.getButton() == MouseEvent.BUTTON1) {
+                //Si no está marcada actuamos con el clic
+                if (seleccionat != null && !seleccionat.marcada && !seleccionat.clicada) {
+                    switch (seleccionat.estat) {
+                        case BOMBA:
+                            gameOver = true;//JOptionPane.showMessageDialog(null, "Game over");
+                            break;
+                        default:
+                            seleccionat.clicada = true;
+                            seleccionat.setImg(seleccionat.buscaImagen());
+                            //Inexplicablemente me cambia la i y la j cuando DIM es par
+                            //if(DIM%2!=0) 
+                                Tablero.actualizarVecinos(i, j);
+                            //else Tablero.actualizarVecinos(j, i);
+                    }
+                    repaint();
+                }
+            } else //Si han apretado el botón derecho
+            if (e.getButton() == MouseEvent.BUTTON3) {
+                if (seleccionat != null && !seleccionat.clicada) {
+                    if (!seleccionat.marcada && contMarcadas == NUM_BOMBAS) {
+                        return;
+                    }
+                    seleccionat.marcada = !seleccionat.marcada;
+                    img = (seleccionat.marcada ? new ImageIcon("src/imagenes/11.png").getImage() : new ImageIcon("src/imagenes/10.png").getImage());
+                    seleccionat.setImg(img);
+                    contMarcadas += (seleccionat.marcada ? 1 : -1);
+                    repaint();
+                }
+            }
+        }
+
+//        @Override
+//        public void mouseDragged(MouseEvent e) {
+//            System.out.println(zell.getX() + "-" + zell.getY());
+//            System.out.println(zrect.getX() + "-" + zrect.getY());
+//            System.out.println();
+//            doMove(e);
+//        }
+//
+//        @Override
+//        public void mouseReleased(MouseEvent e) {
+//            if (Math.floor(zell.getX()) % 25f != 0) {
+//                zell.setX(25.0f * (float) (Math.floor(zell.getX() / 25f)));
+//            }
+//            if (Math.floor(zell.getY()) % 25f != 0) {
+//                zell.setY(25.0f * (float) (Math.floor(zell.getY() / 25f)));
+//            }
+//            if (Math.floor(zrect.getX()) % 25f != 0) {
+//                zrect.setX(25.0f * (float) (Math.floor(zrect.getX() / 25f)));
+//            }
+//            if (Math.floor(zrect.getY()) % 25f != 0) {
+//                zrect.setY(25.0f * (float) (Math.floor(zrect.getY() / 25f)));
+//            }
+//            repaint(); //To change body of generated methods, choose Tools | Templates.
+//        }
+//
+//        private void doMove(MouseEvent e) {
+//
+//            int dx = e.getX() - x;
+//            int dy = e.getY() - y;
+//
+//            if (zrect.isHit(x, y)) {
+//                if (!zell.intersects(zrect.x + dx, zrect.y + dy, zrect.getHeight(), zrect.getWidth())) {
+//                    zrect.addX(dx);
+//                    zrect.addY(dy);
+//                }
+//                repaint();
+//            }
+//
+//            if (zell.isHit(x, y)) {
+//                if (!zrect.intersects(zell.x + dx, zell.y + dy, zell.getHeight(), zell.getWidth())) {
+//                    zell.addX(dx);
+//                    zell.addY(dy);
+//                }
+//                repaint();
+//            }
+//
+//            x += dx;
+//            y += dy;
+//        }
     }
 
     class ZRectangle extends Rectangle2D.Float {
@@ -409,107 +562,6 @@ public class Tablero extends JPanel {
             }
             return mshi;
         }
-    }
-
-    class MovingAdapter extends MouseAdapter {
-
-        private int x;
-        private int y;
-        private final int NUM_BOTONS = MouseInfo.getNumberOfButtons();
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-            ZRectangle seleccionat = null;
-            Image img = null;
-            x = e.getX();
-            y = e.getY();
-            //Buscamos la casilla seleccionada
-            int i = 0, j = 0;
-            fuera:
-            for (i = 0; i < tablero.length; i++) {
-                for (j = 0; j < tablero[i].length; j++) {
-                    if (tablero[i][j].isHit(x, y)) {
-                        seleccionat = tablero[i][j];
-                        break fuera;
-                    }
-
-                }
-            }
-            //Si han apretado el botón izquierdo
-            if (e.getButton() == MouseEvent.BUTTON1) {
-                //Si no está marcada actuamos con el clic
-                if (seleccionat != null && !seleccionat.marcada && !seleccionat.clicada) {
-                    switch (seleccionat.estat) {
-                        case BOMBA:
-                            JOptionPane.showMessageDialog(null, "Game over");
-                            break;
-                        default:
-                            seleccionat.clicada = true;
-                            seleccionat.setImg(seleccionat.buscaImagen());
-                            Tablero.actualizarVecinos(i, j);
-                            repaint();
-                    }
-                }
-            } else //Si han apretado el botón derecho
-            if (e.getButton() == MouseEvent.BUTTON3) {
-                if (seleccionat != null && !seleccionat.clicada) {
-                    seleccionat.marcada = !seleccionat.marcada;
-                    img = (seleccionat.marcada ? new ImageIcon("src/imagenes/11.png").getImage() : new ImageIcon("src/imagenes/10.png").getImage());
-                    seleccionat.setImg(img);
-                    repaint();
-                }
-            }
-        }
-
-//        @Override
-//        public void mouseDragged(MouseEvent e) {
-//            System.out.println(zell.getX() + "-" + zell.getY());
-//            System.out.println(zrect.getX() + "-" + zrect.getY());
-//            System.out.println();
-//            doMove(e);
-//        }
-//
-//        @Override
-//        public void mouseReleased(MouseEvent e) {
-//            if (Math.floor(zell.getX()) % 25f != 0) {
-//                zell.setX(25.0f * (float) (Math.floor(zell.getX() / 25f)));
-//            }
-//            if (Math.floor(zell.getY()) % 25f != 0) {
-//                zell.setY(25.0f * (float) (Math.floor(zell.getY() / 25f)));
-//            }
-//            if (Math.floor(zrect.getX()) % 25f != 0) {
-//                zrect.setX(25.0f * (float) (Math.floor(zrect.getX() / 25f)));
-//            }
-//            if (Math.floor(zrect.getY()) % 25f != 0) {
-//                zrect.setY(25.0f * (float) (Math.floor(zrect.getY() / 25f)));
-//            }
-//            repaint(); //To change body of generated methods, choose Tools | Templates.
-//        }
-//
-//        private void doMove(MouseEvent e) {
-//
-//            int dx = e.getX() - x;
-//            int dy = e.getY() - y;
-//
-//            if (zrect.isHit(x, y)) {
-//                if (!zell.intersects(zrect.x + dx, zrect.y + dy, zrect.getHeight(), zrect.getWidth())) {
-//                    zrect.addX(dx);
-//                    zrect.addY(dy);
-//                }
-//                repaint();
-//            }
-//
-//            if (zell.isHit(x, y)) {
-//                if (!zrect.intersects(zell.x + dx, zell.y + dy, zell.getHeight(), zell.getWidth())) {
-//                    zell.addX(dx);
-//                    zell.addY(dy);
-//                }
-//                repaint();
-//            }
-//
-//            x += dx;
-//            y += dy;
-//        }
     }
 
     class ZEllipse extends Ellipse2D.Float {
