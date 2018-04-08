@@ -6,6 +6,8 @@
 package mibuscaminas;
 
 import java.awt.EventQueue;
+import java.awt.Image;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
@@ -22,11 +24,14 @@ public class MiBuscaMinas extends JFrame {
     }
 
     private void initUI() {
+        //Imatge inicial que posem a les caselles, que és la de la casella sense clicar
+        Image mshi = new ImageIcon("src/imagenes/10.png").getImage();
         Tablero t = new Tablero();
         add(t);
         setTitle("Buscaminas");
-        if(t.test) setSize(t.DIM * t.mshi.getWidth(null) + 1, ((t.DIM * 2)+6) * t.mshi.getHeight(null));
-        else  setSize(t.DIM * t.mshi.getWidth(null) + 1, (t.DIM+6) * t.mshi.getHeight(null));
+        //Canviem el tamany de la finestra segons si estem provant o no l'aplicació  
+        if(t.test) setSize(t.DIM * mshi.getWidth(null) + 1, ((t.DIM * 2)+6) * mshi.getHeight(null));
+        else  setSize(t.DIM * mshi.getWidth(null) + 1, (t.DIM+6) * mshi.getHeight(null));
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
