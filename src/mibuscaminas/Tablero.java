@@ -43,6 +43,7 @@ public class Tablero extends JPanel {
     //Comptador de caselles clicades o descobertes
     private static int contClicadas = 0;
 
+    //Constructor del taulell
     public Tablero() {
         initUI();
         accionsRatoli();
