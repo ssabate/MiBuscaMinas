@@ -358,6 +358,9 @@ public class Tablero extends JPanel {
         return dim;
     }
 
+    public int getNumBombes(){
+        return dim;
+    }
     
     public boolean isTest(){
         return test;
