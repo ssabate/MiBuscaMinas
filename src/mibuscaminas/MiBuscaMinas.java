@@ -30,8 +30,8 @@ public class MiBuscaMinas extends JFrame {
         add(t);
         setTitle("Buscaminas");
         //Canviem el tamany de la finestra segons si estem provant o no l'aplicació  
-        if(t.test) setSize(t.DIM * mshi.getWidth(null) + 1, ((t.DIM * 2)+6) * mshi.getHeight(null));
-        else  setSize(t.DIM * mshi.getWidth(null) + 1, (t.DIM+6) * mshi.getHeight(null));
+        if(t.isTest()) setSize(t.getDim() * mshi.getWidth(null) + 1, ((t.getDim() * 2)+6) * mshi.getHeight(null));
+        else  setSize(t.getDim() * mshi.getWidth(null) + 1, (t.getDim()+6) * mshi.getHeight(null));
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);

@@ -25,17 +25,17 @@ import javax.swing.JPanel;
 public class Tablero extends JPanel {
 
     //Número de files/columnes del taulell
-    final static int DIM = 16;
+    private static int dim = 16;
     //Número de bombes del taulell
-    final static int NUM_BOMBAS = 40;
+    private static int numBombes = 40;
     //Taulell de joc
-    private static Casella[][] tablero = new Casella[DIM][DIM];
+    private static Casella[][] tablero = new Casella[dim][dim];
     //Per saber quan s'ha acabat el joc
     private boolean gameOver = false;
     //Per saber si hem guanyat o hem perdut
     private boolean ganador = false;
     //Quan estiguem testejant el posem a true, sinó false
-    boolean test = false;
+    private static boolean test = false;
     //Comptador de caselles marcades en el botó dret del ratolí
     private int contMarcadas = 0;
     //Comptador de caselles marcades en el botó dret del ratolí i que contenen una bomba
@@ -103,7 +103,7 @@ public class Tablero extends JPanel {
                                 Tablero.actualitzarVeins(i, j);
                                 //Si és la última clicada i hem marcat totes les caselles en bomba el joc s'ha acabat
                                 //i hem guanyat
-                                if (contClicadas == DIM * DIM - NUM_BOMBAS && contMarcadasCorrectas == NUM_BOMBAS) {
+                                if (contClicadas == dim * dim - numBombes && contMarcadasCorrectas == numBombes) {
                                     ganador = gameOver = true;
                                 }
                         }
@@ -115,7 +115,7 @@ public class Tablero extends JPanel {
                     //Si s'ha seleccionat alguna casella no clicada actuem
                     if (seleccionat != null && !seleccionat.isClicada()) {
                         //Si intentem marcar una quant ja les haviem marcat totes no ho dixem fer
-                        if (!seleccionat.isMarcada() && contMarcadas == NUM_BOMBAS) {
+                        if (!seleccionat.isMarcada() && contMarcadas == numBombes) {
                             return;
                         }
                         //Marquem o desmarquem la casella
@@ -130,7 +130,7 @@ public class Tablero extends JPanel {
                         }
                         //Si és l'última marcada i totes les caselles en bomba són correctes el joc s'ha acabat
                         //i hem guanyat
-                        if (contClicadas == DIM * DIM - NUM_BOMBAS && contMarcadasCorrectas == NUM_BOMBAS) {
+                        if (contClicadas == dim * dim - numBombes && contMarcadasCorrectas == numBombes) {
                             ganador = gameOver = true;
                         }
                         //Actualitzem el taulell
@@ -158,8 +158,8 @@ public class Tablero extends JPanel {
         int width = mshi.getWidth(null);
 
         //Si hi ha més o igual número de caselles en bombes que totals no cal ni començar a jugar
-        if (NUM_BOMBAS >= DIM * DIM) {
-            JOptionPane.showMessageDialog(null, "Tablero de " + DIM + "x" + DIM + "=" + (DIM * DIM) + " casillas con " + NUM_BOMBAS + " bombas,\n reduce el número de bombas o aumenta\n el tamaño del tablero!!");
+        if (numBombes >= dim * dim) {
+            JOptionPane.showMessageDialog(null, "Tablero de " + dim + "x" + dim + "=" + (dim * dim) + " casillas con " + numBombes + " bombas,\n reduce el número de bombas o aumenta\n el tamaño del tablero!!");
             System.exit(0);
         }
 
@@ -173,10 +173,10 @@ public class Tablero extends JPanel {
 
         //Col·loco les bombes aleatòriament
         int k = 1;
-        while (k <= NUM_BOMBAS) {
+        while (k <= numBombes) {
             //Calculem una posició del taulell aleatòriament
-            int i = r.nextInt(DIM);
-            int j = r.nextInt(DIM);
+            int i = r.nextInt(dim);
+            int j = r.nextInt(dim);
             //Només tractarem la casella posant una bomba si no tenia ja una abans 
             if (tablero[i][j].getEstat() != Estat.BOMBA) {
                 tablero[i][j].setEstat(Estat.BOMBA);
@@ -212,7 +212,7 @@ public class Tablero extends JPanel {
 
     //Si el valor no és la última casella l'incrementem
     private static int inc(int valor) {
-        if (valor < DIM - 1) {
+        if (valor < dim - 1) {
             valor++;
         }
         return valor;
@@ -238,8 +238,8 @@ public class Tablero extends JPanel {
         Image mshi = new ImageIcon("src/imagenes/10.png").getImage();
 
         //Dibuixo el taulell en les caselles amagades i clicades
-        for (int i = 0; i < DIM; i++) {
-            for (int j = 0; j < DIM; j++) {
+        for (int i = 0; i < dim; i++) {
+            for (int j = 0; j < dim; j++) {
                 //Si el joc no s'ha acabat mostrem les caselles clicades, marcades i no clicades
                 if (!gameOver) {
                     if (tablero[i][j].isMarcada()) {
@@ -278,9 +278,9 @@ public class Tablero extends JPanel {
         }
         //Si estem provant l'aplicació baix mostrem el taulell resolt
         if (test) {
-            for (int i = 0; i < DIM; i++) {
-                for (int j = 0; j < DIM; j++) {
-                    tablero[i][j].dibuja(g2d, DIM + 1, tablero[i][j].buscaImagen());
+            for (int i = 0; i < dim; i++) {
+                for (int j = 0; j < dim; j++) {
+                    tablero[i][j].dibuja(g2d, dim + 1, tablero[i][j].buscaImagen());
                 }
             }
         }
@@ -291,7 +291,7 @@ public class Tablero extends JPanel {
         g2d.setPaint(new Color(0, 0, 0));
         String mensaje;
         if (!gameOver) {
-            mensaje = "Bombas marcadas: " + contMarcadas + "/" + NUM_BOMBAS;
+            mensaje = "Bombas marcadas: " + contMarcadas + "/" + numBombes;
         } else {
             if (!ganador) {
                 mensaje = "Has perdido...";
@@ -300,9 +300,9 @@ public class Tablero extends JPanel {
             }
         }
         if (test) {
-            g2d.drawString(mensaje, 0, (DIM * 2 + 3) * mshi.getHeight(null));
+            g2d.drawString(mensaje, 0, (dim * 2 + 3) * mshi.getHeight(null));
         } else {
-            g2d.drawString(mensaje, 0, (DIM + 2) * mshi.getHeight(null));
+            g2d.drawString(mensaje, 0, (dim + 2) * mshi.getHeight(null));
         }
     }
 
@@ -331,25 +331,35 @@ public class Tablero extends JPanel {
         if (j != 0) {
             tractarCasella(dec(i), j);
         }
-        if (j != DIM - 1) {
+        if (j != dim - 1) {
             tractarCasella(dec(i), inc(j));
         }
         if (i != 0) {
             if (j != 0) {
                 tractarCasella(i, dec(j));
             }
-            if (j != DIM - 1) {
+            if (j != dim - 1) {
                 tractarCasella(i, inc(j));
             }
         }
-        if (i != DIM - 1) {
+        if (i != dim - 1) {
             if (j != 0) {
                 tractarCasella(inc(i), dec(j));
             }
             tractarCasella(inc(i), j);
-            if (j != DIM - 1) {
+            if (j != dim - 1) {
                 tractarCasella(inc(i), inc(j));
             }
         }
     }
+    
+    public int getDim(){
+        return dim;
+    }
+
+    
+    public boolean isTest(){
+        return test;
+    }
+
 }
